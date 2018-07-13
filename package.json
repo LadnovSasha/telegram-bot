@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "start-debug": "nodemon node --inspect index.js"
+    "start-debug": "nodemon --inspect index.js"
   },
   "keywords": [
     "telegram",
@@ -15,7 +15,9 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^6.0.0",
-    "node-telegram-bot-api": "^0.30.0"
+    "node-telegram-bot-api": "^0.30.0",
+    "request": "^2.87.0",
+    "request-promise": "^4.2.2"
   },
   "devDependencies": {
     "nodemon": "^1.17.5"
