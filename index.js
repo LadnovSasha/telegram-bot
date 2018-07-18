@@ -1,7 +1,16 @@
 require('dotenv').config();
-const bot = require('./src/telegram_bot');
+const botInstance = require('./src/telegram_bot');
 const commands = require('./src/commands');
 
-const instance = bot.getInstance();
+const session = new Map();
 
-instance.on('message', commands.pick);
+botInstance.onText(/\/pick/, function(ctx) {
+  const key = `${ctx.from.id}:${ctx.chat.id}`;
+
+  if (session.has(key)) {
+    session.get(key).removeListeners();
+  }
+
+  const command = commands.Pick.initialize(ctx);
+  session.set(key, command);
+});

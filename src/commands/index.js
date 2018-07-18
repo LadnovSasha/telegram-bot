@@ -1,3 +1,3 @@
 module.exports = {
-	pick: require('./pick'),
+  Pick: require('./pick'),
 }

@@ -1,16 +1,22 @@
-function chooseBodyStyle(msg) {
-	return [{ text: 'test', callback_data: 'test_data'}];
-}
-function stub(msg, match) {
-	console.log('recevied')
-	const chatId = msg.chat.id;
-	const options = {
-	    reply_markup: {
-	      inline_keyboard: [chooseBodyStyle()],
-	      parse_mode: 'Markdown'
-    	}
-	}
+const botInstance = require('../../telegram_bot');
+const Workflow = require('./workflow');
 
-	this.sendMessage(chatId, "I'm alive!", options);
+class Pick {
+  constructor(chatId) {
+    this.chatId = chatId;
+    this.query = {};
+  }
+
+  static initialize(msg, match) {
+    const instance = new Pick(msg.chat.id);
+    instance.workflow = new Workflow(msg.chat.id, botInstance);
+    instance.workflow.next();
+
+    return instance;
+  }
+
+  removeListeners() {
+    botInstance.removeQueryListeners();
+  }
 }
-module.exports = stub;
+module.exports = Pick;
