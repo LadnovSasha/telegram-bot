@@ -1,5 +1,6 @@
 const Category = require('./category');
-const flow = ['category'];
+const Bodystyles = require('./bodystyles');
+const flow = ['category', 'bodystyles'];
 
 class Workflow {
   constructor(chatId, bot) {
@@ -28,6 +29,9 @@ class Workflow {
     switch(type) {
       case 'category':
         this.current = await Category.initialize(this.chatId);
+        break;
+      case 'bodystyles':
+        this.current = await Bodystyles.initialize(this.chatId, this.searchQuery.category_id);
         break;
     }
 

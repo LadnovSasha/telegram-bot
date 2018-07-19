@@ -17,6 +17,6 @@ module.exports = {
     return request('/categories');
   },
   getBodystyles(category) {
-    return request(`categories/${category}/bodystyles`)
+    return request(`/categories/${category}/bodystyles`)
   },
 }

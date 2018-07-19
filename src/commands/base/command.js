@@ -2,11 +2,12 @@ const bot = require('../../telegram_bot');
 
 class InlineButtons {
   constructor(chatId) {
+    this.multiSelect = false;
     this.bot = bot;
     this.chatId = chatId;
     this._list = [];
     this.checkedChar = ' ✔';
-    this.query = {};
+    this.selectionMap = new Map();
   }
 
   set list(value) {
@@ -15,6 +16,34 @@ class InlineButtons {
 
   get list() {
     return this._list;
+  }
+
+  parseValue(callback_data) {
+    return callback_data.split(':')[1];
+  }
+
+  uncheckSelection(id) {
+    const value = this.selectionMap.get(id);
+    value[0].text = value[0].text.replace(this.checkedChar, '');
+    this.selectionMap.delete(id);
+  }
+
+  messageCallback(ctx) {
+    const id = this.parseValue(ctx.data);
+    const matched = this.list.find(category => category[0].callback_data === ctx.data);
+
+    if (this.selectionMap.has(id)) {
+      this.uncheckSelection(id);
+      return this.sendEditedMessage();
+    }
+
+    if (!this.multiSelect && this.selectionMap.size > 0)
+      this.uncheckSelection(this.selectionMap.keys().next().value);
+
+    matched[0].text += this.checkedChar;
+    this.selectionMap.set(id, matched);
+
+    this.sendEditedMessage();
   }
 
   sendMessage() {
@@ -38,11 +67,8 @@ class InlineButtons {
   }
 
   sendEditedMessage() {
-    return this.bot.editMessageReplyMarkup({ inline_keyboard: this.list }, { message_id: this.messageId, chat_id: this.chatId });
-  }
-
-  messageCallback() {
-    throw new Error('This method should be implemented');
+    return this.bot.editMessageReplyMarkup(
+      { inline_keyboard: this.list }, { message_id: this.messageId, chat_id: this.chatId });
   }
 
   buildQuery() {
