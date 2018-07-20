@@ -17,6 +17,15 @@ module.exports = {
     return request('/categories');
   },
   getBodystyles(category) {
-    return request(`/categories/${category}/bodystyles`)
+    return request(`/categories/${category}/bodystyles`);
   },
+  getBrands(category) {
+    return request(`/categories/${category}/brands`);
+  },
+  getModels(category, brands) {
+    const requests = brands.map(brandId => request(`/categories/${category}/brands/${brandId}/models`))
+    return Promise.all(requests).then(values => {
+      return [].concat(...values);
+    });
+  }
 }

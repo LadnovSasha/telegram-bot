@@ -1,19 +1,14 @@
-const Category = require('./category');
-const Bodystyles = require('./bodystyles');
-const flow = ['category', 'bodystyles'];
+const InlineButtonsHandler = require('../../base/inlinebuttons_handler');
+const workflowConfig = require('./config');
+const flow = ['category', 'bodystyles', 'brands', 'models'];
 
 class Workflow {
   constructor(chatId, bot) {
     this.bot = bot;
     this.chatId = chatId;
-    this.flow = this.initializeFlow();
+    this.flow = flow[Symbol.iterator]();
     this.setupListener();
     this.searchQuery = {};
-  }
-
-  * initializeFlow() {
-    for (let step of flow)
-      yield step;
   }
 
   setupListener() {
@@ -26,16 +21,31 @@ class Workflow {
   }
 
   async createStep(type) {
-    switch(type) {
-      case 'category':
-        this.current = await Category.initialize(this.chatId);
-        break;
-      case 'bodystyles':
-        this.current = await Bodystyles.initialize(this.chatId, this.searchQuery.category_id);
-        break;
-    }
+    const config = workflowConfig.get(type);
+    let args = [];
+
+    if (!config.api)
+      throw new Error('API call should be specified');
+
+    if (config.apiArgs)
+      args = config.apiArgs.map(arg => this.searchQuery[arg]);
+
+    const list = await config.api(...args);
+
+    this.current = new InlineButtonsHandler({
+      bot: this.bot,
+      chatId: this.chatId,
+      id: config.id,
+      title: config.title,
+      multiSelect: config.multiSelect || false,
+      list: this.formatData(config.id, list),
+    });
 
     return this.current;
+  }
+
+  formatData(id, list) {
+    return list.map(({ name, value }) => ([{ text: name, callback_data: `${id}:${value}` }]));
   }
 
   next() {
